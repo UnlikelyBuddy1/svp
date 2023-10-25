@@ -4,7 +4,6 @@ def parse(path, n=None):
         df = pd.read_csv(path, nrows=n, sep='\t', names=["id", "timestamp", "lat", "lon"])
         return df[df.id != 'DEL']
 
-
 def add_week_number(ds):
         print('input file loaded !')
         print('sorting weeks ...')
@@ -31,6 +30,12 @@ def save_per_week(ds, output_folder="./output/original/weeks"):
         return
 
 def create_lat_lon_tiles(df, lat_precision=0.1, lon_precision=0.1):
-    df['lat_tile'] = (df['lat'] / lat_precision).apply(int) * lat_precision
-    df['lon_tile'] = (df['lon'] / lon_precision).apply(int) * lon_precision
-    return df
+        df['lat_tile'] = (df['lat'] / lat_precision).apply(int) * lat_precision
+        df['lon_tile'] = (df['lon'] / lon_precision).apply(int) * lon_precision
+        return df
+
+def separate_users(df):
+    user_dict = {}
+    for user_id, user_df in df.groupby('id'):
+        user_dict[user_id] = user_df
+    return user_dict
