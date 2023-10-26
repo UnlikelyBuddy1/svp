@@ -28,3 +28,5 @@ if __name__ == "__main__":
     # plot_markov_chain_simple(matrix, threshold=0.5)
     # plot_markov_chain_heatmap(matrix)
     # plot_image(tiled_week_frame)
+
+    # parse_to_json()
