@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import numpy as np
 
 def plot_image(df):
     # Group by tiles and id, then count unique users per tile
@@ -17,6 +18,7 @@ def plot_image(df):
     
     plt.xlabel('Latitude Tile (°)')
     plt.ylabel('Longitude Tile (°)')
+    
     plt.title('Unique User Distribution Across Locations')
     plt.show()
 
@@ -79,3 +81,36 @@ def plot_markov_chain_heatmap(transition_matrix):
     ax.set_title("Markov Chain Transition Heatmap")
     plt.tight_layout()
     plt.show()
+
+
+
+def plot_heatmap(df, user_id):
+
+    if hasattr(df, 'lat_tile'):
+        tile_counts = df.groupby(['lat_tile', 'lon_tile']).size().reset_index(name='count')
+    else:
+        tile_counts = df.groupby(['lat', 'lon']).size().reset_index(name='count')
+
+    # Merge tile_counts back into df
+    df = df.merge(tile_counts, on=['lat', 'lon'])
+
+    # Sort the DataFrame by 'count' in descending order to put in evidence the high-density points
+    df = df.sort_values(by='count', ascending=True)
+
+    plt.figure(figsize=(10, 6))
+    plt.scatter(df['lat'], df['lon'], c=df['count'], cmap='viridis', s=100)
+    
+    plt.colorbar(label='Density')
+    
+    #plt.xlim([min(df['lat_tile']) - 0.1, max(df['lat_tile']) + 0.1])
+    #plt.ylim([min(df['lon_tile']) - 0.1, max(df['lon_tile']) + 0.1])
+
+    plt.ylim([40.00, 50.00])
+    plt.xlim([0.00, 10.00])
+    
+    plt.xlabel('Latitude')
+    plt.ylabel('Longitude')
+    plt.title(f'Heatmap of user {user_id}')
+    plt.show()
+    
+    print(max(df['count']))
