@@ -2,7 +2,7 @@ from parsing import *
 from heatmap import *
 from graph import *
 import pandas as pd
-from poi import *
+#from poi import *
 
 if __name__ == "__main__":
 
@@ -16,8 +16,9 @@ if __name__ == "__main__":
 
     # Heatmap of users 
     #og = parse("../data/original/c3465dad3864bb1e373891fdcfbfcca5f974db6a9e0b646584e07c5f554d7df7", 1000000)
-    ano = parsing.parse("data/autofill_444_files/autofill_1_444", 1000000)
-    heatmap(ano)
+    #ano = parsing.parse("data/autofill_444_files/autofill_1_444", 1000000)
+    #ano = parsing.parse("data/original/c3465dad3864bb1e373891fdcfbfcca5f974db6a9e0b646584e07c5f554d7df7", 10000000)
+    #heatmap(ano)
     
     # week_frame = pd.read_csv('./output/original/weeks/data_2015_10.csv', sep=',')
     # tiled_week_frame = create_lat_lon_tiles(week_frame, 0.1, 0.1)
@@ -29,4 +30,17 @@ if __name__ == "__main__":
     # plot_markov_chain_heatmap(matrix)
     # plot_image(tiled_week_frame)
 
-    # parse_to_json()
+    parse_to_json()
+    # log_similarity()
+    # log_similarity(
+    #                 {
+    #                     "2023-10":
+    #                     {
+    #                         "matches": [
+    #                         {
+    #                             "og_id": 1,
+    #                             "anon_id": 842,
+    #                             "similarity": 0.33
+    #                         }]
+    #                     }
+    #                 })
