@@ -7,7 +7,7 @@ from scipy.optimize import linear_sum_assignment
 import json
 from multiprocessing import Pool
 
-coordonate_precision = 0.001
+coordonate_precision = 0.01
 time_interval = 15
 class Parser:
     def __init__(self, path):
@@ -134,16 +134,18 @@ class DatasetComparator:
     def formatJSON(self):
         week = self.bestMatches['week']
         matches = self.bestMatches['matches']
-        formatted_results = {week: {}}
+        formatted_results = {}
         for match in matches:
             original = match['original']
             anon = match['anon']
-            # Assign the anon to the corresponding original
-            if original not in formatted_results[week]:
-                formatted_results[week][original] = []
-            formatted_results[week][original].append(anon)
+            # Initialize original user's dict if not present
+            if original not in formatted_results:
+                formatted_results[original] = {}
+            # Assign the anon to the corresponding week under the original user
+            if week not in formatted_results[original]:
+                formatted_results[original][week] = []
+            formatted_results[original][week].append(anon)
         return formatted_results
-    
 
 def process_week(original_path, anon_path):
     print(f"Comparing {original_path} with {anon_path}...")
@@ -151,20 +153,34 @@ def process_week(original_path, anon_path):
     comparator.findBestMatches()
     return comparator.formatJSON()
 
+def merge_results(results):
+    merged = {}
+    for week_result in results:
+        for original, week_data in week_result.items():
+            if original not in merged:
+                merged[original] = {}
+
+            for week, anon_list in week_data.items():
+                if week in merged[original]:
+                    merged[original][week].extend(anon_list)
+                else:
+                    merged[original][week] = anon_list
+    return merged
+
 def attack(original_dir, anon_dir):
-    results = []
-    file_paths = []
-    for filename in os.listdir(original_dir):
-        if filename.endswith(".csv"):
-            original_path = os.path.join(original_dir, filename)
-            anon_path = os.path.join(anon_dir, filename)
-            file_paths.append((original_path, anon_path))
+    file_paths = [(os.path.join(original_dir, f), os.path.join(anon_dir, f))
+                  for f in os.listdir(original_dir) if f.endswith(".csv")]
     with Pool() as pool:
         results = pool.starmap(process_week, file_paths)
-    output_JSON = json.dumps(results, indent=4)
+    print("Merging results...")
+    merged_results = merge_results(results)
+    output_JSON = json.dumps(merged_results, indent=4)
     with open('output.json', 'w') as file:
         file.write(output_JSON)
     return output_JSON
 
-output_JSON = attack("./output/original/weeks", "./output/anon/weeks")
-print(output_JSON)
+if __name__ == '__main__':
+    start_time = pd.Timestamp.now()
+    output_JSON = attack("./output/original/weeks", "./output/anon/weeks")
+    end_time = pd.Timestamp.now()
+    print(f"Finished in {(end_time - start_time).total_seconds()} seconds.")
