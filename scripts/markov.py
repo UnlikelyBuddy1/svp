@@ -8,7 +8,7 @@ import json
 from multiprocessing import Pool
 
 coordonate_precision = 0.01
-time_interval = 15
+time_interval = 1
 class Parser:
     def __init__(self, path):
         self.path = path
@@ -167,7 +167,7 @@ def merge_results(results):
                     merged[original][week] = anon_list
     return merged
 
-def attack(original_dir, anon_dir):
+def attack(original_dir, anon_dir, output_name):
     file_paths = [(os.path.join(original_dir, f), os.path.join(anon_dir, f))
                   for f in os.listdir(original_dir) if f.endswith(".csv")]
     with Pool() as pool:
@@ -175,12 +175,18 @@ def attack(original_dir, anon_dir):
     print("Merging results...")
     merged_results = merge_results(results)
     output_JSON = json.dumps(merged_results, indent=4)
-    with open('output.json', 'w') as file:
+    with open(f'./results/{output_name}.json', 'w') as file:
         file.write(output_JSON)
     return output_JSON
 
 if __name__ == '__main__':
     start_time = pd.Timestamp.now()
-    output_JSON = attack("./output/original/weeks", "./output/anon/weeks")
+    parser = Parser("../data/autofill/autofill_444/set")
+    parser.processWeeks("./output/anon/autofill_444")
     end_time = pd.Timestamp.now()
-    print(f"Finished in {(end_time - start_time).total_seconds()} seconds.")
+    print(f"Parsing took {(end_time - start_time).total_seconds()} seconds.")
+    
+    start_time = pd.Timestamp.now()
+    attack("./output/original/weeks", "./output/anon/autofill_444", "autofill_444")
+    end_time = pd.Timestamp.now()
+    print(f"Processing took {(end_time - start_time).total_seconds()} seconds.")
